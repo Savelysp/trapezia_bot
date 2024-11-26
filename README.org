@@ -1,4 +1,4 @@
-* Bot progres [0%]
+* Bot progres [8%]
 ** TODO [#A] models [0/3]
 тут описана база данных
 - [ ] user [0/5]
@@ -39,7 +39,7 @@
   - [ ] регистрация
   - [ ] создание записи
   - [ ] удаление записи
-** TODO [#A] settings
+** DONE [#A] settings
 ** TODO [#B] webhook
 ** TODO [#B] states
 ** TODO [#B] docker [0/3]

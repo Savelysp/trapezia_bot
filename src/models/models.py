@@ -11,6 +11,13 @@ from sqlalchemy.orm import relationship
 
 from src.models.base import Base
 
+__all__ = [
+        "User",
+        "Service",
+        "Entry",
+        "Base",
+        ]
+
 
 class User(Base):
     id = Column(BIGINT, primary_key=True)

@@ -1,16 +1,16 @@
-* Bot progres [30%]
-** TODO [#A] testing [0/5]
-- [ ] docker
-- [ ] webhook
-- [ ] migrations
-- [ ] models
-- [ ] echo
-** TODO [#A] docker [4/5]
+* Bot progres [53%]
+** TODO [#A] testing [5/5]
+- [X] docker
+- [X] webhook
+- [X] migrations
+- [X] models
+- [X] echo
+** TODO [#A] docker [5/5]
 - [X] bot
 - [X] bd
 - [X] server
 - [X] migrations
-- [ ] redis
+- [X] redis
 ** TODO [#A] keyboards [1/2]
 тут описаны клавиатуры
 - [X] reply kbd [3/3]
@@ -31,10 +31,10 @@
 - [X] регистрация
 - [ ] создание записи
 - [ ] удаление записи
-** TODO [#B] migrations
-** TODO [#B] states
+** DONE [#B] migrations
+** DONE [#B] states
 ** TODO [#C] admin
-** TODO [#C] redis
+** DONE [#C] redis
 ** TODO [#C] schemas
 ** DONE [#A] settings
 ** DONE [#B] webhook

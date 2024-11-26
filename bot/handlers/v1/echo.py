@@ -38,21 +38,18 @@ async def support_message(message: Message):
 @router.message(F.text == "запись")
 async def entry_message(message: Message):
     async with sessionmaker() as session:
-        try:
-            await session.execute(
-                select(User).where(User.id == message.from_user.id)
-                )
-        except Exception:
+        user = select(User)
+        user = user.filter(User.id == message.from_user.id)
+        result = await session.scalars(statement=user)
+        if result.fetchall():
+            text = "да"
+            await message.answer(
+                text=text,)
+        else:
             text = "нет"
             await message.answer(
                 text=text,
                 reply_markup=get_phone_number_kb
-                )
-        else:
-            text = "да"
-            await message.answer(
-                text=text,
-                reply_markup=
                 )
 
 
@@ -60,7 +57,6 @@ async def entry_message(message: Message):
 async def collect_phone_number(message: Message, state: FSMContext):
     await message.delete()
     await state.clear()
-    # await state.set_state(state=UserStatesGroup.create.phone_number)
     await state.update_data(phone_number=message.contact.phone_number)
     await state.set_state(state=UserStatesGroup.create.name)
     text = "как к вам обращаться"
@@ -71,6 +67,7 @@ async def collect_phone_number(message: Message, state: FSMContext):
 
 @router.message(UserStatesGroup.create.name)
 async def set_user_name(message: Message, state: FSMContext):
+    await message.delete()
     if len(message.text) > 32:
         text = f"имя {message.text} слишком длинное"
         await message.answer(
@@ -80,7 +77,7 @@ async def set_user_name(message: Message, state: FSMContext):
         state_data = await state.get_data()
         await state.clear()
         async with sessionmaker() as session:
-            user = User(id=message.from_user.id, name=message.text, phone=state_data.phone_number)
+            user = User(id=message.from_user.id, name=message.text, phone=state_data["phone_number"])
             session.add(instance=user)
             try:
                 await session.commit()
@@ -91,7 +88,7 @@ async def set_user_name(message: Message, state: FSMContext):
 
 
 
-@router.callback_query(MainEntryCallbackData.filter(F.action == 'create'))
-async def create_entry(message: Message):
-    ...
-
+# @router.callback_query(MainEntryCallbackData.filter(F.action == 'create'))
+# async def create_entry(message: Message):
+#     ...
+#

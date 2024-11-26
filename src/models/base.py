@@ -10,4 +10,3 @@ class Base(DeclarativeBase):
     @declared_attr.directive
     def __tablename__(self):
         return self.__name__.lower()
-

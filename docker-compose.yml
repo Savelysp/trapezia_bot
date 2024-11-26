@@ -15,21 +15,7 @@ services:
       - ".env"
     depends_on:
       - db
-
-  # redis:
-
-  migrations:
-    container_name: "migrations"
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: python -m migrations
-    volumes:
-      - ".:/opt:rw"
-    env_file:
-      - ".env"
-    depends_on:
-      - "db"
+      - redis
 
   db:
     container_name: "db"
@@ -50,3 +36,24 @@ services:
       - "./log:/var/log/nginx:rw"
     depends_on:
       - bot
+
+  migrations:
+    container_name: "migrations"
+    command: python -m migrations
+    env_file:
+      - ".env"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - "./src:/opt/src:ro"
+      - "./migrations:/opt/migrations:rw"
+      - "./alembic.ini:/opt/alembic.ini"
+    depends_on:
+      - db
+
+  redis:
+    container_name: "redis"
+    hostname: "redis"
+    image: redis:7.4.1-alpine3.20
+

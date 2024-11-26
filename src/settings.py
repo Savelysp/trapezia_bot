@@ -4,7 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 __all__ = [
-
+        "settings",
+        "engine",
+        "sessionmaker",
+        "bot",
+        "dispatcher",
         ]
 
 
@@ -24,3 +28,4 @@ engine = create_async_engine(url=settings.POSTGRES_URL.unicode_string())
 sessionmaker = async_sessionmaker(bind=engine)
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN.get_secret_value()),
 dispatcher = Dispatcher()
+

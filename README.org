@@ -1,4 +1,4 @@
-* Bot progres [25%]
+* Bot progres [33%]
 ** DONE [#A] models [3/3]
 тут описана база данных
 - [X] user [5/5]
@@ -40,13 +40,14 @@
 ** DONE [#A] settings
 ** DONE [#B] webhook
 ** TODO [#B] states
-** TODO [#B] docker [0/3]
-  - [ ] bot
-  - [ ] bd
-  - [ ] server
-  - [ ] migrations
+** TODO [#B] docker [4/5]
+  - [X] bot
+  - [X] bd
+  - [X] server
+  - [X] migrations
+  - [ ] redis
 ** TODO [#B] migrations
-** TODO [#B] nginx
+** DONE [#B] nginx
 ** TODO [#C] admin
 ** TODO [#C] redis
 ** TODO [#C] schemas

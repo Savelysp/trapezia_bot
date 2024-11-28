@@ -12,12 +12,17 @@ __all__ = [
     "approve_ikb",
     "delete_entry_ikb",
     "choose_service_ikb",
+    # "ApproveCallbackData"
     ]
 
 
 class MainEntryCallbackData(CallbackData, prefix='entry'):
     id: PositiveInt
     action: Literal['delete', 'choose']
+
+
+# class ApproveCallbackData(CallbackData, prefix="approve"):
+#     action: Literal["yes", "no"]
 
 
 approve_ikb = InlineKeyboardMarkup(

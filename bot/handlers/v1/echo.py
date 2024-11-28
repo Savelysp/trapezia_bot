@@ -1,7 +1,8 @@
+from datetime import datetime
 from aiogram import F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import CallbackQuery, Message
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from src.keyboards import (
@@ -9,10 +10,11 @@ from src.keyboards import (
     approve_ikb,
     choose_service_ikb,
     delete_entry_ikb,
-    get_phone_number_kb,
+    # get_phone_number_kb,
     main_panel_kb,
+    # ApproveCallbackData
 )
-from src.models import User, Service
+from src.models import User, Service, Entry
 from src.settings import sessionmaker
 from src.states import UserStatesGroup
 from src.utils import check_user_existence
@@ -42,54 +44,93 @@ async def support_message(message: Message):
         )
 
 
-# @router.message(F.text == "мои записи")
-# @router.message(F.text == "записаться")
-# async def entry_message(message: Message):
-#     await message.delete()
-#     async with sessionmaker() as session:
-#         user = select(User)
-#         user = user.filter(User.id == message.from_user.id)
-#         result = await session.scalars(statement=user)
-#         if result.fetchall():
-#             services = select(Service)
-#             services = await session.scalars(statement=services)
-#             text = "да"
-#             await message.answer(
-#                 text=text,
-#                 reply_markup=choose_service_ikb(services=services.fetchall())
-#                 )
-#         else:
-#             text = "нет"
-#             await message.answer(
-#                 text=text,
-#                 reply_markup=get_phone_number_kb
-#                 )
-
 @router.message(F.text == "записаться")
 @check_user_existence
-async def entry_message(message: Message):
+async def create_entry_message(message: Message):
     await message.delete()
+    # async with sessionmaker() as session:
+    #     service = Service(id=1, name='test', title='test', price=12.00)
+    #     session.add(instance=service)
+    #     try:
+    #         await session.commit()
+    #     except IntegrityError:
+    #         print("сервис не создан")
     async with sessionmaker() as session:
         services = select(Service)
         services = await session.scalars(statement=services)
         text = "да"
         await message.answer(
             text=text,
-            # reply_markup=choose_service_ikb(services=services.fetchall())
+            reply_markup=choose_service_ikb(services=services.fetchall())
             )
 
+
+@router.callback_query(MainEntryCallbackData.filter(F.action == 'choose'))
+async def choose_service_message(callback: CallbackQuery, callback_data: MainEntryCallbackData, state: FSMContext):
+    await state.clear()
+    await state.update_data(service_id=callback_data.id)
+    await state.set_state(state=UserStatesGroup.create_entry.time)
+    await callback.message.edit_text(
+            text="введите время"
+            )
+
+
+@router.message(UserStatesGroup.create_entry.time)
+async def set_entry_time(message: Message, state: FSMContext):
+    await message.delete()
+    await state.update_data(time=message.text)
+    await state.set_state(state=UserStatesGroup.create_entry.approve)
+    state_data = await state.get_data()
+    await message.answer(
+            text=f"{state_data["service_id"]} и {state_data["time"]}",
+            reply_markup=approve_ikb
+            )
+
+
+@router.callback_query(UserStatesGroup.create_entry.approve, F.data == "yes") 
+async def approve_entry(callback: CallbackQuery, state: FSMContext):
+    state_data = await state.get_data()
+    state.clear()
+    entry = Entry(
+            user_id=callback.from_user.id, 
+            service_id=state_data["service_id"], 
+            entry_time=datetime.strptime(state_data["time"], "%Y-%m-%d").date()
+            )
+    async with sessionmaker() as session:
+        session.add(instance=entry)
+        try:
+            await session.commit()
+        except Exception as e:
+            print(e, "это наша ошибка")
+            print("хрень какая-то")
+        else:
+            await callback.message.edit_text(
+                    text="супер"
+                    )
+
+
+@router.callback_query(UserStatesGroup.create_entry.approve, F.data == "no") 
+async def cancel_entry(callback: CallbackQuery, state: FSMContext):
+    state.clear()
+    await callback.message.edit_text(
+            text="ok"
+            )
+ 
+
+# @router.message(F.text == "мои записи")
+# @check_user_existence
 
 @router.message(F.contact)
 async def collect_phone_number(message: Message, state: FSMContext):
     await message.delete()
     await state.clear()
     await state.update_data(phone_number=message.contact.phone_number)
-    await state.set_state(state=UserStatesGroup.create.name)
+    await state.set_state(state=UserStatesGroup.create_user.name)
     text = "как к вам обращаться"
     await message.answer(text=text)
 
-
-@router.message(UserStatesGroup.create.name)
+    
+@router.message(UserStatesGroup.create_user.name)
 async def set_user_name(message: Message, state: FSMContext):
     await message.delete()
     if len(message.text) > 32:

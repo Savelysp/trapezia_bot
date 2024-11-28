@@ -49,7 +49,7 @@ async def support_message(message: Message):
 async def create_entry_message(message: Message):
     await message.delete()
     # async with sessionmaker() as session:
-    #     service = Service(id=1, name='test', title='test', price=12.00)
+    #     service = Service(id=2, name='test2', title='test', price=12.00)
     #     session.add(instance=service)
     #     try:
     #         await session.commit()
@@ -105,7 +105,10 @@ async def approve_entry(callback: CallbackQuery, state: FSMContext):
             print("хрень какая-то")
         else:
             await callback.message.edit_text(
-                    text="супер"
+                    text="супер",
+                    )
+            await callback.message.edit_reply_markup(
+                    reply_markup=main_panel_kb
                     )
 
 
@@ -117,8 +120,34 @@ async def cancel_entry(callback: CallbackQuery, state: FSMContext):
             )
  
 
-# @router.message(F.text == "мои записи")
-# @check_user_existence
+@router.message(F.text == "мои записи")
+@check_user_existence
+async def check_entries(message: Message):
+    await message.delete()
+    async with sessionmaker() as session:
+        entries = select(Entry)
+        entries = entries.filter(Entry.user_id == message.from_user.id)
+        entries = await session.scalars(statement=entries)
+        entries = [entry for entry in entries.fetchall()]
+        if entries:
+            for entry in entries:
+                await message.answer(
+                        text=f"{entry.entry_time}", 
+                        reply_markup=delete_entry_ikb(entry=entry)
+                        )
+        else:
+            await message.answer(text="d", reply_markup=main_panel_kb)
+
+
+@router.callback_query(MainEntryCallbackData.filter(F.action == "delete"))
+async def delete_entry(callback: CallbackQuery, callback_data: MainEntryCallbackData):
+    print(callback_data.id)
+    
+
+    
+
+
+
 
 @router.message(F.contact)
 async def collect_phone_number(message: Message, state: FSMContext):
@@ -149,8 +178,3 @@ async def set_user_name(message: Message, state: FSMContext):
             else:
                 await message.answer(text="вы зареганы", reply_markup=main_panel_kb)
 
-
-# @router.callback_query(MainEntryCallbackData.filter(F.action == 'create'))
-# async def create_entry(message: Message):
-#     ...
-#

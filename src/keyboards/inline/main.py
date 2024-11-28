@@ -1,11 +1,12 @@
-from typing import Literal
+from datetime import datetime
+from typing import Any, Literal
 
 from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from pydantic import PositiveInt
 
-from src.models import Service
+from src.models import Service, Entry
 
 __all__ = [
     "MainEntryCallbackData",
@@ -17,7 +18,7 @@ __all__ = [
 
 
 class MainEntryCallbackData(CallbackData, prefix='entry'):
-    id: PositiveInt
+    id: PositiveInt | str
     action: Literal['delete', 'choose']
 
 
@@ -35,13 +36,16 @@ approve_ikb = InlineKeyboardMarkup(
 )
 
 
-def delete_entry_ikb(service: Service):
+def delete_entry_ikb(entry: Entry):
+    print(entry.entry_time)
+    print(type(entry.entry_time))
     return InlineKeyboardMarkup(
             inline_keyboard=[
                 [
                     InlineKeyboardButton(
                         text="delete", 
-                        callback_data=MainEntryCallbackData(id=service.id, action="delete").pack()
+                        # callback_data=str(entry.entry_time)
+                        callback_data=MainEntryCallbackData(id=str(entry.entry_time).replace(":", "-"), action="delete").pack()
                         )
                     ]
                 ]

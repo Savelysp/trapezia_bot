@@ -1,4 +1,4 @@
-* Bot progres [71%]
+* Bot progres [73%]
 ** DONE [#A] testing [5/5]
 - [X] docker
 - [X] webhook
@@ -32,7 +32,8 @@
 - [ ] создание записи
 - [ ] удаление записи
 ** DONE [#B] migrations
-** TODO [#B] Написать usercheck декоратор
+** DONE [#B] Написать usercheck декоратор
+** TODO [#B] вынести регистрацию пользователя в декоратор
 ** DONE [#B] states
 ** TODO [#C] admin
 ** DONE [#C] redis

@@ -1,14 +1,21 @@
 from aiogram import F, Router
 from aiogram.filters import CommandStart
-from aiogram.types import Message
-from sqlalchemy.exc import IntegrityError
-from src.keyboards import get_phone_number_kb, main_panel_kb
-from src.models import User
-from src.settings import sessionmaker
-from sqlalchemy import select
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from src.keyboards import (
+    MainEntryCallbackData,
+    approve_ikb,
+    choose_service_ikb,
+    delete_entry_ikb,
+    get_phone_number_kb,
+    main_panel_kb,
+)
+from src.models import User, Service
+from src.settings import sessionmaker
 from src.states import UserStatesGroup
-
+from src.utils import check_user_existence
 
 __all__ = ["router"]
 
@@ -35,22 +42,41 @@ async def support_message(message: Message):
         )
 
 
-@router.message(F.text == "запись")
+# @router.message(F.text == "мои записи")
+# @router.message(F.text == "записаться")
+# async def entry_message(message: Message):
+#     await message.delete()
+#     async with sessionmaker() as session:
+#         user = select(User)
+#         user = user.filter(User.id == message.from_user.id)
+#         result = await session.scalars(statement=user)
+#         if result.fetchall():
+#             services = select(Service)
+#             services = await session.scalars(statement=services)
+#             text = "да"
+#             await message.answer(
+#                 text=text,
+#                 reply_markup=choose_service_ikb(services=services.fetchall())
+#                 )
+#         else:
+#             text = "нет"
+#             await message.answer(
+#                 text=text,
+#                 reply_markup=get_phone_number_kb
+#                 )
+
+@router.message(F.text == "записаться")
+@check_user_existence
 async def entry_message(message: Message):
+    await message.delete()
     async with sessionmaker() as session:
-        user = select(User)
-        user = user.filter(User.id == message.from_user.id)
-        result = await session.scalars(statement=user)
-        if result.fetchall():
-            text = "да"
-            await message.answer(
-                text=text,)
-        else:
-            text = "нет"
-            await message.answer(
-                text=text,
-                reply_markup=get_phone_number_kb
-                )
+        services = select(Service)
+        services = await session.scalars(statement=services)
+        text = "да"
+        await message.answer(
+            text=text,
+            # reply_markup=choose_service_ikb(services=services.fetchall())
+            )
 
 
 @router.message(F.contact)
@@ -60,9 +86,7 @@ async def collect_phone_number(message: Message, state: FSMContext):
     await state.update_data(phone_number=message.contact.phone_number)
     await state.set_state(state=UserStatesGroup.create.name)
     text = "как к вам обращаться"
-    await message.answer(
-            text=text
-            )
+    await message.answer(text=text)
 
 
 @router.message(UserStatesGroup.create.name)
@@ -70,9 +94,7 @@ async def set_user_name(message: Message, state: FSMContext):
     await message.delete()
     if len(message.text) > 32:
         text = f"имя {message.text} слишком длинное"
-        await message.answer(
-                text=text
-                )
+        await message.answer(text=text)
     else:
         state_data = await state.get_data()
         await state.clear()
@@ -84,8 +106,7 @@ async def set_user_name(message: Message, state: FSMContext):
             except IntegrityError:
                 await message.answer(text="ошибка")
             else:
-                await message.answer(text="вы зареганы")
-
+                await message.answer(text="вы зареганы", reply_markup=main_panel_kb)
 
 
 # @router.callback_query(MainEntryCallbackData.filter(F.action == 'create'))

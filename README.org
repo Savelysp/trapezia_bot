@@ -1,26 +1,26 @@
-* Bot progres [53%]
-** TODO [#A] testing [5/5]
+* Bot progres [71%]
+** DONE [#A] testing [5/5]
 - [X] docker
 - [X] webhook
 - [X] migrations
 - [X] models
 - [X] echo
-** TODO [#A] docker [5/5]
+** DONE [#A] docker [5/5]
 - [X] bot
 - [X] bd
 - [X] server
 - [X] migrations
 - [X] redis
-** TODO [#A] keyboards [1/2]
+** DONE [#A] keyboards [2/2]
 тут описаны клавиатуры
-- [X] reply kbd [3/3]
+- [X] reply kbd [4/4]
   - [X] получить контакты админа
   - [X] проверить записи
   - [X] регистрация
-- [-] inline kbd [0/3]
-  - [ ] создать запись
-  - [ ] удалить запись
-  - [ ] выбор услуги
+  - [X] создать запись
+- [X] inline kbd [2/2]
+  - [X] удалить запись
+  - [X] выбор услуги
 ** TODO [#A] echo [3/6]
 тут логика
 - [X] стартовое сообщение
@@ -32,6 +32,7 @@
 - [ ] создание записи
 - [ ] удаление записи
 ** DONE [#B] migrations
+** TODO [#B] Написать usercheck декоратор
 ** DONE [#B] states
 ** TODO [#C] admin
 ** DONE [#C] redis

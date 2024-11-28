@@ -11,7 +11,10 @@ main_panel_kb = ReplyKeyboardMarkup(
     keyboard=[
         [
             KeyboardButton(
-                text="запись"
+                text="мои записи"
+            ),
+            KeyboardButton(
+                text="записаться"
             ),
             KeyboardButton(
                 text="связь"

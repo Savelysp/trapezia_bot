@@ -6,6 +6,7 @@ from sqlalchemy import (
     VARCHAR,
     Column,
     ForeignKey,
+    DateTime
 )
 from sqlalchemy.orm import relationship
 
@@ -36,7 +37,7 @@ class Service(Base):
 
 
 class Entry(Base):
-    entry_time = Column(TIMESTAMP, primary_key=True)
+    entry_time = Column(DateTime, primary_key=True)
     user_id = Column(BIGINT, 
                      ForeignKey(column=User.id, ondelete="RESTRICT", onupdate="CASCADE"),
                      nullable=False)

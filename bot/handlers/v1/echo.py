@@ -3,7 +3,7 @@ from aiogram import F, Router
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.exc import IntegrityError
 from src.keyboards import (
     MainEntryCallbackData,
@@ -90,11 +90,11 @@ async def set_entry_time(message: Message, state: FSMContext):
 @router.callback_query(UserStatesGroup.create_entry.approve, F.data == "yes") 
 async def approve_entry(callback: CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
-    state.clear()
+    await state.clear()
     entry = Entry(
             user_id=callback.from_user.id, 
-            service_id=state_data["service_id"], 
-            entry_time=datetime.strptime(state_data["time"], "%Y-%m-%d").date()
+            service_id=int(state_data["service_id"]), 
+            entry_time=datetime.strptime(state_data["time"], "%Y-%m-%d %H-%M")
             )
     async with sessionmaker() as session:
         session.add(instance=entry)
@@ -141,11 +141,10 @@ async def check_entries(message: Message):
 
 @router.callback_query(MainEntryCallbackData.filter(F.action == "delete"))
 async def delete_entry(callback: CallbackQuery, callback_data: MainEntryCallbackData):
-    print(callback_data.id)
-    
-
-    
-
+    await callback.message.delete()
+    async with sessionmaker() as session:
+        await session.execute(delete(Entry).filter(Entry.entry_time == datetime.strptime(callback_data.id, "%Y-%m-%d %H-%M-%S")))
+        await session.commit()
 
 
 

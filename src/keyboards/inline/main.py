@@ -37,8 +37,6 @@ approve_ikb = InlineKeyboardMarkup(
 
 
 def delete_entry_ikb(entry: Entry):
-    print(entry.entry_time)
-    print(type(entry.entry_time))
     return InlineKeyboardMarkup(
             inline_keyboard=[
                 [

@@ -30,9 +30,9 @@ async def start(message: Message, state: FSMContext):
     text = "привет"
     await state.clear()
     await message.answer(
-            text=text,
-            reply_markup=main_panel_kb
-            )
+        text=text,
+        reply_markup=main_panel_kb
+    )
 
 
 @router.message(F.text == "связь")
@@ -41,7 +41,7 @@ async def support_message(message: Message):
     await message.delete()
     await message.answer(
         text=text,
-        )
+    )
 
 
 @router.message(F.text == "записаться")
@@ -62,7 +62,7 @@ async def create_entry_message(message: Message):
         await message.answer(
             text=text,
             reply_markup=choose_service_ikb(services=services.fetchall())
-            )
+        )
 
 
 @router.callback_query(MainEntryCallbackData.filter(F.action == 'choose'))
@@ -71,8 +71,8 @@ async def choose_service_message(callback: CallbackQuery, callback_data: MainEnt
     await state.update_data(service_id=callback_data.id)
     await state.set_state(state=UserStatesGroup.create_entry.time)
     await callback.message.edit_text(
-            text="введите время"
-            )
+        text="введите время"
+    )
 
 
 @router.message(UserStatesGroup.create_entry.time)
@@ -82,9 +82,9 @@ async def set_entry_time(message: Message, state: FSMContext):
     await state.set_state(state=UserStatesGroup.create_entry.approve)
     state_data = await state.get_data()
     await message.answer(
-            text=f"{state_data["service_id"]} и {state_data["time"]}",
-            reply_markup=approve_ikb
-            )
+        text=f"{state_data["service_id"]} и {state_data["time"]}",
+        reply_markup=approve_ikb
+    )
 
 
 @router.callback_query(UserStatesGroup.create_entry.approve, F.data == "yes") 
@@ -92,10 +92,10 @@ async def approve_entry(callback: CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
     await state.clear()
     entry = Entry(
-            user_id=callback.from_user.id, 
-            service_id=int(state_data["service_id"]), 
-            entry_time=datetime.strptime(state_data["time"], "%Y-%m-%d %H-%M")
-            )
+        user_id=callback.from_user.id, 
+        service_id=int(state_data["service_id"]), 
+        entry_time=datetime.strptime(state_data["time"], "%Y-%m-%d %H-%M")
+    )
     async with sessionmaker() as session:
         session.add(instance=entry)
         try:
@@ -105,19 +105,19 @@ async def approve_entry(callback: CallbackQuery, state: FSMContext):
             print("хрень какая-то")
         else:
             await callback.message.edit_text(
-                    text="супер",
-                    )
+                text="супер",
+            )
             await callback.message.edit_reply_markup(
-                    reply_markup=main_panel_kb
-                    )
+                reply_markup=main_panel_kb
+            )
 
 
 @router.callback_query(UserStatesGroup.create_entry.approve, F.data == "no") 
 async def cancel_entry(callback: CallbackQuery, state: FSMContext):
     state.clear()
     await callback.message.edit_text(
-            text="ok"
-            )
+        text="ok"
+    )
  
 
 @router.message(F.text == "мои записи")
@@ -132,9 +132,9 @@ async def check_entries(message: Message):
         if entries:
             for entry in entries:
                 await message.answer(
-                        text=f"{entry.entry_time}", 
-                        reply_markup=delete_entry_ikb(entry=entry)
-                        )
+                    text=f"{entry.entry_time}", 
+                    reply_markup=delete_entry_ikb(entry=entry)
+                )
         else:
             await message.answer(text="d", reply_markup=main_panel_kb)
 

@@ -1,9 +1,7 @@
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 # from sqlalchemy.ext.asyncio import AsyncAttrs
 
-__all__ = [
-        "Base",
-        ]
+__all__ = ["Base"]
 
 
 class Base(DeclarativeBase):

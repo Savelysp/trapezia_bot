@@ -14,7 +14,7 @@ __all__ = [
     "delete_entry_ikb",
     "choose_service_ikb",
     # "ApproveCallbackData"
-    ]
+]
 
 
 class MainEntryCallbackData(CallbackData, prefix='entry'):
@@ -38,24 +38,25 @@ approve_ikb = InlineKeyboardMarkup(
 
 def delete_entry_ikb(entry: Entry):
     return InlineKeyboardMarkup(
-            inline_keyboard=[
-                [
-                    InlineKeyboardButton(
-                        text="delete", 
-                        # callback_data=str(entry.entry_time)
-                        callback_data=MainEntryCallbackData(id=str(entry.entry_time).replace(":", "-"), action="delete").pack()
-                        )
-                    ]
-                ]
-            )
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="delete", 
+                    # callback_data=str(entry.entry_time)
+                    callback_data=MainEntryCallbackData(id=str(entry.entry_time).replace(":", "-"), action="delete").pack()
+                )
+            ]
+        ]
+    )
 
 
 def choose_service_ikb(services: Service):
     builder = InlineKeyboardBuilder()
     for service in services:
-        builder.row(InlineKeyboardButton(
-            text=service.name,
-            callback_data=MainEntryCallbackData(id=service.id, action="choose").pack()
+        builder.row(
+            InlineKeyboardButton(
+                text=service.name,
+                callback_data=MainEntryCallbackData(id=service.id, action="choose").pack()
             )
         )
     return builder.as_markup()

@@ -1,6 +1,4 @@
 from .states import *
 
-__all__ = [
-        "UserStatesGroup",
-        ]
+__all__ = ["UserStatesGroup"]
 

@@ -13,11 +13,11 @@ from sqlalchemy.orm import relationship
 from src.models.base import Base
 
 __all__ = [
-        "User",
-        "Service",
-        "Entry",
-        "Base",
-        ]
+    "User",
+    "Service",
+    "Entry",
+    "Base",
+]
 
 
 class User(Base):
@@ -38,13 +38,17 @@ class Service(Base):
 
 class Entry(Base):
     entry_time = Column(DateTime, primary_key=True)
-    user_id = Column(BIGINT, 
-                     ForeignKey(column=User.id, ondelete="RESTRICT", onupdate="CASCADE"),
-                     nullable=False)
+    user_id = Column(
+        BIGINT,
+        ForeignKey(column=User.id, ondelete="RESTRICT", onupdate="CASCADE"),
+        nullable=False
+    )
     user = relationship(argument=User, back_populates="entries")
 
-    service_id = Column(BIGINT, 
-                        ForeignKey(column=Service.id, ondelete="RESTRICT", onupdate="CASCADE"), 
-                        nullable=False)
+    service_id = Column(
+        BIGINT,
+        ForeignKey(column=Service.id, ondelete="RESTRICT", onupdate="CASCADE"),
+        nullable=False
+    )
     service = relationship(argument=Service, back_populates="entries")
 

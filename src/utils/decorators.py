@@ -18,8 +18,8 @@ def check_user_existence(func):
             else:
                 text = "вы не зарегестрированы"
                 await message.answer(
-                        text=text,
-                        reply_markup=get_phone_number_kb
-                        )
+                    text=text, 
+                    reply_markup=get_phone_number_kb
+                )
     return wrapper
 

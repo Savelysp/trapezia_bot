@@ -1,8 +1,6 @@
 from aiogram.fsm.state import State, StatesGroup
 
-__all__ = [
-        "UserStatesGroup",
-        ]
+__all__ = ["UserStatesGroup"]
 
 
 class CreateUserStatesGroup(StatesGroup):

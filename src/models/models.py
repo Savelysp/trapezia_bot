@@ -6,7 +6,8 @@ from sqlalchemy import (
     VARCHAR,
     Column,
     ForeignKey,
-    DateTime
+    DateTime,
+    CheckConstraint
 )
 from sqlalchemy.orm import relationship
 
@@ -37,6 +38,10 @@ class Service(Base):
 
 
 class Entry(Base):
+    __table_args__ = (
+        CheckConstraint("entry_time > now()"),
+    )
+
     entry_time = Column(DateTime, primary_key=True)
     user_id = Column(
         BIGINT,

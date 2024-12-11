@@ -4,6 +4,7 @@ from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy import select, delete
+from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from src.keyboards import (
     MainEntryCallbackData,
@@ -37,7 +38,7 @@ async def start(message: Message, state: FSMContext):
 
 @router.message(F.text == "связь")
 async def support_message(message: Message):
-    text = "ссылка"
+    text = "ссылка на контакт"
     await message.delete()
     await message.answer(
         text=text,
@@ -49,7 +50,7 @@ async def support_message(message: Message):
 async def create_entry_message(message: Message):
     await message.delete()
     # async with sessionmaker() as session:
-    #     service = Service(id=2, name='test2', title='test', price=12.00)
+    #     service = Service(id=1, name='test1', title='test', price=12.00)
     #     session.add(instance=service)
     #     try:
     #         await session.commit()
@@ -58,7 +59,7 @@ async def create_entry_message(message: Message):
     async with sessionmaker() as session:
         services = select(Service)
         services = await session.scalars(statement=services)
-        text = "да"
+        text = "Выберите услугу"
         await message.answer(
             text=text,
             reply_markup=choose_service_ikb(services=services.fetchall())
@@ -71,38 +72,52 @@ async def choose_service_message(callback: CallbackQuery, callback_data: MainEnt
     await state.update_data(service_id=callback_data.id)
     await state.set_state(state=UserStatesGroup.create_entry.time)
     await callback.message.edit_text(
-        text="введите время"
+        text="введите время в формате \"день-месяц-год часы:минуты\""
     )
 
 
 @router.message(UserStatesGroup.create_entry.time)
 async def set_entry_time(message: Message, state: FSMContext):
     await message.delete()
-    await state.update_data(time=message.text)
-    await state.set_state(state=UserStatesGroup.create_entry.approve)
-    state_data = await state.get_data()
-    await message.answer(
-        text=f"{state_data["service_id"]} и {state_data["time"]}",
-        reply_markup=approve_ikb
-    )
+    try:
+        if datetime.strptime(message.text, "%d-%m-%Y %H:%M") <= datetime.now():
+            raise ValueError
+    except ValueError:
+        await message.answer(text="неправильная дата")
+    else:
+        await state.update_data(time=message.text)
+        await state.set_state(state=UserStatesGroup.create_entry.approve)
+        state_data = await state.get_data()
+        await message.answer(
+            text=f"{state_data["service_id"]} и {state_data["time"]}",
+            reply_markup=approve_ikb
+        )
 
 
 @router.callback_query(UserStatesGroup.create_entry.approve, F.data == "yes") 
 async def approve_entry(callback: CallbackQuery, state: FSMContext):
     state_data = await state.get_data()
     await state.clear()
+    # try:
     entry = Entry(
         user_id=callback.from_user.id, 
         service_id=int(state_data["service_id"]), 
-        entry_time=datetime.strptime(state_data["time"], "%Y-%m-%d %H-%M")
+        # entry_time=state_data["time"]
+        entry_time=datetime.strptime(state_data["time"], "%d-%m-%Y %H:%M")
     )
+    # except ValueError:
+    #     await callback.message.edit_text(
+    #         text="Неправильная дата"
+    #     )
     async with sessionmaker() as session:
         session.add(instance=entry)
         try:
             await session.commit()
         except Exception as e:
             print(e, "это наша ошибка")
-            print("хрень какая-то")
+            await callback.message.edit_text(
+                text="запись уже существует"
+            )
         else:
             await callback.message.edit_text(
                 text="супер",
@@ -125,18 +140,18 @@ async def cancel_entry(callback: CallbackQuery, state: FSMContext):
 async def check_entries(message: Message):
     await message.delete()
     async with sessionmaker() as session:
-        entries = select(Entry)
+        entries = select(Entry).options(selectinload(Entry.service))
         entries = entries.filter(Entry.user_id == message.from_user.id)
         entries = await session.scalars(statement=entries)
         entries = [entry for entry in entries.fetchall()]
         if entries:
             for entry in entries:
                 await message.answer(
-                    text=f"{entry.entry_time}", 
+                    text=f"время: {entry.entry_time}\nуслуга: {entry.service.name}", 
                     reply_markup=delete_entry_ikb(entry=entry)
                 )
         else:
-            await message.answer(text="d", reply_markup=main_panel_kb)
+            await message.answer(text="У вас нет записей", reply_markup=main_panel_kb)
 
 
 @router.callback_query(MainEntryCallbackData.filter(F.action == "delete"))

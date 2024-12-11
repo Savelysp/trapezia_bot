@@ -27,10 +27,6 @@
 - [X] регистрация
 - [X] создание записи
 - [X] удаление записи
-** DONE [#B] migrations
-** DONE [#B] Написать usercheck декоратор
-** DONE [#B] states
-** DONE [#C] redis
 ** DONE [#A] keyboards [2/2]
 тут описаны клавиатуры
 - [X] reply kbd [4/4]
@@ -41,9 +37,6 @@
 - [X] inline kbd [2/2]
   - [X] удалить запись
   - [X] выбор услуги
-** DONE [#A] settings
-** DONE [#B] webhook
-** DONE [#B] nginx
 ** DONE [#A] models [3/3]
 тут описана база данных
 - [X] user [5/5]
@@ -63,3 +56,10 @@
   - [X] id юзера
   - [X] id записи
     
+** DONE [#B] migrations
+** DONE [#B] Написать usercheck декоратор
+** DONE [#B] states
+** DONE [#C] redis
+** DONE [#A] settings
+** DONE [#B] webhook
+** DONE [#B] nginx
